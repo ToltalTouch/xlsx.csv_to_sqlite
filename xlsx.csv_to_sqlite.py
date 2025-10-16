@@ -5,8 +5,23 @@ import os
 import logging
 import sys
 
-def csv_to_sqlite(input_path=None, db_path=None, table_name='patrimonios'):
-    logging.basicConfig(level=logging.INFO)
+def csv_to_sqlite(input_path=None, db_path=None, table_name=None, delimiter=None):
+    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
+    # Configurar log para console e arquivo
+    log_file = os.path.join(log_dir, 'importacao.log')
+    
+    # Configuração de logging para console e arquivo
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()  # Mantém logs no console também
+        ]
+    )
     
     if getattr(sys, 'frozen', False):
         dir_path = os.path.dirname(sys.executable)
@@ -28,10 +43,10 @@ def csv_to_sqlite(input_path=None, db_path=None, table_name='patrimonios'):
             logging.warning(f"Mais de um arquivo encontrados. Usando {input_path}")
             
     if db_path is None:
-        db_path = os.path.join(dir_path, "patrimonios.db")
+        db_path = os.path.join(dir_path, table_name + ".db")
     elif os.path.isdir(db_path):
-        db_path = os.path.join(db_path, "patrimonios.db")
-        
+        db_path = os.path.join(db_path, table_name + ".db")
+
     if not os.path.exists(input_path):
         logging.error(f"Arquivo não encontrado: {input_path}")
         return
@@ -46,65 +61,98 @@ def csv_to_sqlite(input_path=None, db_path=None, table_name='patrimonios'):
         total_row = 0
         
         if file_type == '.csv':
-            reader = pd.read_csv(input_path, chunksize=chunksize)
-            logging.info(f"Lendo arquivo CSV: {input_path}")
-        
+            if delimiter is None:
+                with open(input_path, 'r', encoding='utf-8', errors='replace') as f:
+                    sample = f.read(4096)
+                    if sample.count(';') > sample.count(','):
+                        delimiter = ';'
+                    else:
+                        delimiter = ','
+                        
+            logging.info(f"Processando arquivo CSV: {input_path} com delimitador '{delimiter}'")
+            
+            encodings = ['utf-8', 'latin1', 'utf-16', 'cp1252']
+            success = False
+
+            for encoding in encodings:
+                try:
+                    reader = pd.read_csv(
+                        input_path,
+                        chunksize=chunksize,
+                        delimiter=delimiter,
+                        on_bad_lines='warn',
+                        encoding=encoding,
+                        dtype=str,
+                        low_memory=False
+                )
+                    
+                    next(reader)
+                    reader = pd.read_csv(
+                        input_path,
+                        chunksize=chunksize,
+                        delimiter=delimiter,
+                        on_bad_lines='warn',
+                        encoding=encoding,
+                        dtype=str,
+                        low_memory=False
+                    )
+                    logging.info(f"Arquivo CSV lido com sucesso usando codificação {encoding}")
+                    
+                    success = True
+                    break
+                except UnicodeDecodeError as e: 
+                    logging.warning(f"Falha ao ler CSV com codificação {encoding}: {e}")
+
+                except Exception as e:
+                    logging.warning(f"Erro ao ler CSV com codificação {encoding}: {e}")
+            if not success:
+                logging.info("Tentando abordagem diferente")
+                try:
+                    reader = pd.read_csv(
+                        input_path,
+                        chunksize=chunksize,
+                        delimiter=delimiter,
+                        on_bad_lines='skip',
+                        encoding='latin1',
+                        quoting=3,
+                        escapechar='\\',
+                        dtype=str
+                    )
+                except Exception as e:
+                    logging.error(f"Falha ao ler CSV com codificação latin1: {e}")
+                    raise
+            
         elif file_type == '.xlsx':
-            logging.info(f"Procesando arquivo XLSX: {input_path}")
+            logging.info(f"Processando arquivo XLSX: {input_path}")
             df = pd.read_excel(input_path, engine='openpyxl')
             chunks = [df[i:i + chunksize] for i in range(0, df.shape[0], chunksize)]
             reader = iter(chunks)
         else:
-            logging.error("Formato de arquivo não suportado. Use CSV ou XLSX.")
-            return
-        
-        for i, chunk in enumerate(reader):
-            if 'descricao' in chunk.columns:
-                chunk['descricao_upper'] = chunk['descricao'].str.upper()
+            logging.error(f"Formato não suportado: {file_type}")
             
-            if i == 0:
+        for i, chunk in enumerate(reader):
+            if i ==0:
                 chunk.to_sql(table_name, conn, if_exists='replace', index=False)
-                logging.info(f"Tabela {table_name} criada. Importando dados...")
-                
+                logging.info(f"Tabela '{table_name}' criada e dados inseridos (primeiro chunk).")
             else:
                 chunk.to_sql(table_name, conn, if_exists='append', index=False)
+                logging.info(f"Chunk {i+1} inserido na tabela '{table_name}'.")
             
-            total_row += len(chunk)
-            logging.info(f"Importados {total_row} registros...")
+            logging.info(f"Linhas inseridas neste chunk: {len(chunk)}")
             
         if create_indices:
-            logging.info("Criando indices...")
+            logging.info("Criando índices para otimizar consultas...")
             cur = conn.cursor()
-            
-            cur.execute(f"CREATE INDEX IF NOT EXISTS idx_{table_name}_codigo ON {table_name}(codigo)")
-        
-            try:
-                cur.execute(f"""
-                            CREATE VIRTUAL TABLE IF NOT EXISTS {table_name}_fts USING fts5(
-                            descricao_upper,
-                            content={table_name},
-                            content_rowid=rowid,
-                            tokenize='porter unicode61'
-                            )
-                """)
-                
-                cur.execute(f"""
-                            INSERT INTO {table_name}_fts({table_name}_fts) VALUES('rebuild')
-                """)
-                logging.info("Indices criados com sucesso.")
-                
-            except sqlite3.OperationalError as e:
-                logging.warning(f"Aviso: Índice FTS não criado: {e}")
-                logging.info("Usando índice convencional para texto")
-                cur.execute(f"CREATE INDEX IF NOT EXISTS idx_{table_name}_descricao_upper ON {table_name}(descricao_upper)")
-                
-        conn.commit()
-        logging.info("Importação concluída.")
-        
-        db_size = os.path.getsize(db_path) / (1024 * 1024)
-        logging.info(f"Tamanho do banco de dados: {db_size:.2f} MB")
-        logging.info(f"Total de registros importados: {total_row}")
-    
+            cur.execute(f"PRAGMA table_info({table_name})")
+            columns = [info[1] for info in cur.fetchall()]
+            logging.info(f"Colunas na tabela: {', '.join(columns)}")
+
+            if 'codigo' in columns:
+                logging.info("Criando índice para a coluna 'codigo'...")
+                cur.execute(f"CREATE INDEX IF NOT EXISTS idx_codigo ON {table_name} (codigo)")
+            else:
+                logging.warning("Coluna 'codigo' não encontrada. Índice não criado.")
+
     except Exception as e:
         logging.error(f"Erro durante a importação: {e}")
         conn.rollback()
@@ -122,5 +170,6 @@ if __name__ == "__main__":
         db_path = sys.argv[2]
     else:
         db_path = None
-        
-    csv_to_sqlite(input_path, db_path)
+    
+    table_name = input("Digite o nome da tabela para importar os dados ")
+    csv_to_sqlite(input_path, db_path, table_name=table_name)

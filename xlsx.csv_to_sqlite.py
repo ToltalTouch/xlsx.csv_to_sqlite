@@ -43,9 +43,9 @@ def csv_to_sqlite(input_path=None, db_path=None, table_name=None, delimiter=None
             logging.warning(f"Mais de um arquivo encontrados. Usando {input_path}")
             
     if db_path is None:
-        db_path = os.path.join(dir_path, table_name + ".db")
+        db_path = os.path.join(dir_path, table_name + ".sqlite")
     elif os.path.isdir(db_path):
-        db_path = os.path.join(db_path, table_name + ".db")
+        db_path = os.path.join(db_path, table_name + ".sqlite")
 
     if not os.path.exists(input_path):
         logging.error(f"Arquivo não encontrado: {input_path}")
@@ -147,12 +147,16 @@ def csv_to_sqlite(input_path=None, db_path=None, table_name=None, delimiter=None
             columns = [info[1] for info in cur.fetchall()]
             logging.info(f"Colunas na tabela: {', '.join(columns)}")
 
-            if 'codigo' in columns:
-                logging.info("Criando índice para a coluna 'codigo'...")
-                cur.execute(f"CREATE INDEX IF NOT EXISTS idx_codigo ON {table_name} (codigo)")
-            else:
-                logging.warning("Coluna 'codigo' não encontrada. Índice não criado.")
-
+            if 'id' not in columns:
+                try:
+                    logging.info("Criando índice para a coluna 'id'...")
+                    cur.execute(f"ALTER TABLE {table_name} ADD COLUMN id INTEGER PRIMARY KEY AUTOINCREMENT")
+                    cur.execute(f"UPDATE {table_name} SET id = NULL")
+                    cur.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS idx_{table_name}_id ON {table_name} (id)")
+                    conn.commit()
+                except Exception as e:
+                    logging.error(f"Erro ao criar índice na coluna 'id': {e}")
+                    
     except Exception as e:
         logging.error(f"Erro durante a importação: {e}")
         conn.rollback()

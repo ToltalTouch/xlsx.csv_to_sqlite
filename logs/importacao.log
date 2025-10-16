@@ -110,3 +110,40 @@
 2025-10-16 11:56:19,935 - INFO - Criando índices para otimizar consultas...
 2025-10-16 11:56:19,935 - INFO - Colunas na tabela: orgao, unidade, gestao, uorg, conta_contabil, numero_patrimonial_antigo, numero_patrimonial, data_tombamento, codigo_material, nome_material, descricao_complementar, marca, modelo, serie, fabricante, processo, codigo_terceiros, valor_inicial_bem, valor_bem, valor_depreciado, valor_liquido, valor_doacao_venda, codigo_tipo_bem, nome_tipo_bem, codigo_situacao, nome_situacao, codigo_destinacao, nome_destinacao, cpf_responsavel, nome_responsavel, cpf_responsavel_uorg, nome_responsavel_uorg, updated_at
 2025-10-16 11:56:19,936 - WARNING - Coluna 'codigo' não encontrada. Índice não criado.
+2025-10-16 14:18:02,457 - ERROR - Nenhum arquivo CSV ou XLSX encontrado no diretorio
+2025-10-16 14:18:28,012 - INFO - Processando arquivo CSV: c:\python\xlsx.csv_to_sqlite\Relação completa SIADS.csv com delimitador ';'
+2025-10-16 14:18:28,052 - WARNING - Falha ao ler CSV com codificação utf-8: 'utf-8' codec can't decode byte 0xc7 in position 64: invalid continuation byte
+2025-10-16 14:18:28,127 - INFO - Arquivo CSV lido com sucesso usando codificação latin1
+2025-10-16 14:18:28,344 - INFO - Tabela 'db_patrimonio' criada e dados inseridos (primeiro chunk).
+2025-10-16 14:18:28,345 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:18:28,559 - INFO - Chunk 2 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:18:28,559 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:18:28,747 - INFO - Chunk 3 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:18:28,748 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:18:28,938 - INFO - Chunk 4 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:18:28,938 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:18:29,151 - INFO - Chunk 5 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:18:29,152 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:18:29,226 - INFO - Chunk 6 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:18:29,226 - INFO - Linhas inseridas neste chunk: 2648
+2025-10-16 14:18:29,227 - INFO - Criando índices para otimizar consultas...
+2025-10-16 14:18:29,227 - INFO - Colunas na tabela: orgao, unidade, gestao, uorg, conta_contabil, numero_patrimonial_antigo, numero_patrimonial, data_tombamento, codigo_material, nome_material, descricao_complementar, marca, modelo, serie, fabricante, processo, codigo_terceiros, valor_inicial_bem, valor_bem, valor_depreciado, valor_liquido, valor_doacao_venda, codigo_tipo_bem, nome_tipo_bem, codigo_situacao, nome_situacao, codigo_destinacao, nome_destinacao, cpf_responsavel, nome_responsavel, cpf_responsavel_uorg, nome_responsavel_uorg, updated_at
+2025-10-16 14:18:29,228 - WARNING - Coluna 'codigo' não encontrada. Índice não criado.
+2025-10-16 14:20:17,326 - INFO - Processando arquivo CSV: c:\python\xlsx.csv_to_sqlite\Relação completa SIADS.csv com delimitador ';'
+2025-10-16 14:20:17,404 - WARNING - Falha ao ler CSV com codificação utf-8: 'utf-8' codec can't decode byte 0xc7 in position 64: invalid continuation byte
+2025-10-16 14:20:17,540 - INFO - Arquivo CSV lido com sucesso usando codificação latin1
+2025-10-16 14:20:17,846 - INFO - Tabela 'db_patrimonio' criada e dados inseridos (primeiro chunk).
+2025-10-16 14:20:17,846 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:20:18,139 - INFO - Chunk 2 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:20:18,140 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:20:18,369 - INFO - Chunk 3 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:20:18,369 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:20:18,555 - INFO - Chunk 4 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:20:18,555 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:20:18,748 - INFO - Chunk 5 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:20:18,748 - INFO - Linhas inseridas neste chunk: 10000
+2025-10-16 14:20:18,823 - INFO - Chunk 6 inserido na tabela 'db_patrimonio'.
+2025-10-16 14:20:18,824 - INFO - Linhas inseridas neste chunk: 2648
+2025-10-16 14:20:18,824 - INFO - Criando índices para otimizar consultas...
+2025-10-16 14:20:18,825 - INFO - Colunas na tabela: orgao, unidade, gestao, uorg, conta_contabil, numero_patrimonial_antigo, numero_patrimonial, data_tombamento, codigo_material, nome_material, descricao_complementar, marca, modelo, serie, fabricante, processo, codigo_terceiros, valor_inicial_bem, valor_bem, valor_depreciado, valor_liquido, valor_doacao_venda, codigo_tipo_bem, nome_tipo_bem, codigo_situacao, nome_situacao, codigo_destinacao, nome_destinacao, cpf_responsavel, nome_responsavel, cpf_responsavel_uorg, nome_responsavel_uorg, updated_at
+2025-10-16 14:20:18,825 - WARNING - Coluna 'codigo' não encontrada. Índice não criado.
